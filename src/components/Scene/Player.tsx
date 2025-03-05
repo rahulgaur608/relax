@@ -72,10 +72,9 @@ const usePlayerControls = () => {
 
 interface PlayerProps {
   position?: [number, number, number]
-  onMove?: (position: Vector3) => void
 }
 
-export default function Player({ position = [0, 10, 0], onMove }: PlayerProps) {
+export default function Player({ position = [0, 10, 0] }: PlayerProps) {
   // Memoize vectors to prevent recreation on each frame
   const direction = useMemo(() => new Vector3(), [])
   const frontVector = useMemo(() => new Vector3(), [])
@@ -152,11 +151,6 @@ export default function Player({ position = [0, 10, 0], onMove }: PlayerProps) {
     if (!isGrounded.current) {
       api.applyForce([0, CONTROLS.GRAVITY_FORCE, 0], [0, 0, 0])
     }
-
-    api.position.subscribe((p) => {
-      updatePosition(p)
-      onMove?.(new Vector3(p[0], p[1], p[2]))
-    })
   })
 
   return <mesh ref={ref as Ref<Mesh>} castShadow receiveShadow />
