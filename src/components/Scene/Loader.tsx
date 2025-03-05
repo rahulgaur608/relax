@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 const Loader = () => {
+  const [showInfo, setShowInfo] = useState(false);
+
   return (
-    <StyledWrapper>
+    <StyledWrapper onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)}>
       <div className="cube-loader">
         <div className="cube-top" />
         <div className="cube-wrapper">
@@ -13,11 +15,87 @@ const Loader = () => {
           <span style={{'--i': 3} as React.CSSProperties} className="cube-span" />
         </div>
       </div>
+      
+      {showInfo && (
+        <div className="info-tooltip">
+          <div className="info-content">
+            <h3 className="info-title">Controls</h3>
+            <ul className="info-list">
+              <li>WASD - Move</li>
+              <li>SPACE - Jump</li>
+              <li>SHIFT - Sprint</li>
+              <li>MOUSE - Look</li>
+            </ul>
+            
+            <h3 className="info-title">Features</h3>
+            <ul className="info-list">
+              <li>Dynamic lighting</li>
+              <li>Physics movement</li>
+              <li>Wave animations</li>
+              <li>Aurora borealis</li>
+            </ul>
+          </div>
+        </div>
+      )}
     </StyledWrapper>
   );
 }
 
 const StyledWrapper = styled.div`
+  position: relative;
+  cursor: pointer;
+
+  .info-tooltip {
+    position: absolute;
+    bottom: calc(100% + 1rem);
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    width: max-content;
+    color: white;
+    font-size: 0.875rem;
+    transform-origin: bottom right;
+    animation: tooltipFadeIn 0.2s ease-out;
+  }
+
+  .info-content {
+    min-width: 200px;
+  }
+
+  .info-title {
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .info-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
+  }
+
+  @keyframes tooltipFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
   .cube-loader {
     position: relative;
     width: 75px;

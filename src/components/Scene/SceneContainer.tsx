@@ -239,8 +239,6 @@ const AudioPlayer = () => {
 }
 
 export default function SceneContainer() {
-  const [showMenu, setShowMenu] = useState(false)
-
   return (
     <div className="w-full h-screen">
       <Canvas 
@@ -253,13 +251,11 @@ export default function SceneContainer() {
       </Canvas>
       
       <AudioPlayer />
-      <MenuOverlay isVisible={showMenu} onClose={() => setShowMenu(false)} />
       
-      <div className="fixed bottom-6 right-6 z-10 flex items-center gap-4">
+      <div className="fixed bottom-6 right-6 z-10">
         <div className="scale-75">
           <Loader />
         </div>
-        <SceneButton onClick={() => setShowMenu(true)}>About</SceneButton>
       </div>
     </div>
   )
