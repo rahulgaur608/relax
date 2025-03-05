@@ -3,29 +3,92 @@ import styled from 'styled-components';
 
 const Loader = () => {
   const [showInfo, setShowInfo] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    setCoords({ x, y });
+  };
+
+  const addRipple = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const newRipple = {
+      x,
+      y,
+      id: Date.now(),
+    };
+    setRipples((prevRipples) => [...prevRipples, newRipple]);
+    setTimeout(() => {
+      setRipples((prevRipples) => 
+        prevRipples.filter((ripple) => ripple.id !== newRipple.id)
+      );
+    }, 1000);
+  };
 
   return (
-    <StyledWrapper onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)}>
+    <StyledWrapper 
+      onMouseEnter={() => {
+        setShowInfo(true);
+        setIsActive(true);
+      }} 
+      onMouseLeave={() => {
+        setShowInfo(false);
+        setIsActive(false);
+        setCoords({ x: 0, y: 0 });
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseDown={(e) => {
+        setIsActive(true);
+        addRipple(e);
+      }}
+      onMouseUp={() => setIsActive(false)}
+      className={isActive ? 'active' : ''}
+      style={{
+        transform: `perspective(1000px) rotateX(${-coords.y}deg) rotateY(${coords.x}deg) scale(${isActive ? '0.95' : '1'})`
+      }}
+    >
       <div className="cube-loader">
         <div className="cube-top">
-          <span className="cube-text">RAHUL.G</span>
+          <div className="pattern-overlay" />
         </div>
         <div className="cube-wrapper">
           <span style={{'--i': 0} as React.CSSProperties} className="cube-span">
-            <span className="cube-text">RAHUL.G</span>
+            <div className="pattern-overlay" />
           </span>
           <span style={{'--i': 1} as React.CSSProperties} className="cube-span">
-            <span className="cube-text">RAHUL.G</span>
+            <div className="pattern-overlay" />
           </span>
           <span style={{'--i': 2} as React.CSSProperties} className="cube-span">
-            <span className="cube-text">RAHUL.G</span>
+            <div className="pattern-overlay" />
           </span>
           <span style={{'--i': 3} as React.CSSProperties} className="cube-span">
-            <span className="cube-text">RAHUL.G</span>
+            <div className="pattern-overlay" />
           </span>
+        </div>
+        <div className="particles">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="particle" style={{ '--particle-index': i } as React.CSSProperties} />
+          ))}
         </div>
       </div>
       
+      {ripples.map((ripple) => (
+        <div
+          key={ripple.id}
+          className="ripple"
+          style={{
+            left: ripple.x,
+            top: ripple.y,
+          }}
+        />
+      ))}
+
       {showInfo && (
         <div className="info-tooltip">
           <div className="info-content">
@@ -59,6 +122,148 @@ const Loader = () => {
 const StyledWrapper = styled.div`
   position: relative;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    transform: translate(-50%, -50%) scale(0);
+    animation: rippleEffect 1s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+  }
+
+  @keyframes rippleEffect {
+    0% {
+      width: 0;
+      height: 0;
+      opacity: 0.5;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    100% {
+      width: 200px;
+      height: 200px;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  .particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transform-style: preserve-3d;
+    animation: particleFloat 3s ease-in-out infinite;
+    animation-delay: calc(var(--particle-index) * 0.2s);
+    opacity: 0;
+  }
+
+  @keyframes particleFloat {
+    0% {
+      transform: translate3d(
+        calc(sin(var(--particle-index)) * 50px),
+        calc(cos(var(--particle-index)) * 50px),
+        0
+      ) scale(0);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translate3d(
+        calc(sin(var(--particle-index)) * 100px),
+        calc(cos(var(--particle-index)) * 100px),
+        50px
+      ) scale(1);
+      opacity: 0;
+    }
+  }
+
+  &:hover {
+    .particle {
+      animation-play-state: running;
+    }
+    .cube-loader::after {
+      opacity: 1;
+    }
+  }
+
+  .cube-loader {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+  }
+
+  &.active {
+    .cube-loader::after {
+      opacity: 0.5;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+    }
+    .particle {
+      animation-duration: 2s;
+    }
+  }
+
+  @keyframes activePulse {
+    0% {
+      transform: rotateX(-25deg) scale(1);
+    }
+    100% {
+      transform: rotateX(-35deg) scale(1.05);
+    }
+  }
+
+  @keyframes activeRainbow {
+    0% { 
+      background-position: 0% 50%;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+    50% { 
+      background-position: 100% 50%;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+    100% { 
+      background-position: 0% 50%;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+  }
+
+  .cube-loader {
+    position: relative;
+    width: 75px;
+    height: 75px;
+    transform-style: preserve-3d;
+    transform: rotateX(-30deg);
+    animation: animate 4s linear infinite;
+    transition: transform 0.3s ease;
+  }
+
+  .cube-span, .cube-top {
+    transition: all 0.3s ease;
+    will-change: transform, filter, animation;
+  }
+
+  .pattern-overlay::before,
+  .pattern-overlay::after {
+    transition: animation-duration 0.3s ease;
+  }
 
   .info-tooltip {
     position: absolute;
@@ -145,25 +350,6 @@ const StyledWrapper = styled.div`
     }
   }
 
-  .cube-loader {
-    position: relative;
-    width: 75px;
-    height: 75px;
-    transform-style: preserve-3d;
-    transform: rotateX(-30deg);
-    animation: animate 4s linear infinite;
-  }
-
-  @keyframes animate {
-    0% {
-      transform: rotateX(-30deg) rotateY(0);
-    }
-
-    100% {
-      transform: rotateX(-30deg) rotateY(360deg);
-    }
-  }
-
   .cube-loader .cube-wrapper {
     position: absolute;
     width: 100%;
@@ -191,6 +377,7 @@ const StyledWrapper = styled.div`
     background-size: 400%;
     animation: rainbow 12s linear infinite;
     opacity: 0.8;
+    overflow: hidden;
   }
 
   .cube-top {
@@ -231,27 +418,74 @@ const StyledWrapper = styled.div`
       0 0 80px rgba(255, 255, 255, 0.2);
   }
 
+  .pattern-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    mix-blend-mode: overlay;
+  }
+
+  .pattern-overlay::before,
+  .pattern-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    animation: patternFade 8s linear infinite;
+  }
+
+  .pattern-overlay::before {
+    background-image: 
+      linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    animation: patternMove 20s linear infinite;
+  }
+
+  .pattern-overlay::after {
+    background-image: 
+      radial-gradient(circle at 50% 50%, transparent 5px, rgba(255, 255, 255, 0.1) 5px),
+      radial-gradient(circle at 0% 50%, transparent 3px, rgba(255, 255, 255, 0.08) 3px),
+      radial-gradient(circle at 100% 50%, transparent 3px, rgba(255, 255, 255, 0.08) 3px);
+    background-size: 20px 20px, 15px 15px, 15px 15px;
+    animation: patternMove2 15s linear infinite;
+    opacity: 0;
+  }
+
+  @keyframes patternFade {
+    0%, 45%, 55%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  @keyframes patternMove {
+    0% {
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    100% {
+      background-position: 40px 40px, 40px 50px, 50px 30px, 30px 40px;
+    }
+  }
+
+  @keyframes patternMove2 {
+    0% {
+      background-position: 0 0, 0 0, 0 0;
+    }
+    100% {
+      background-position: 40px 40px, 30px 30px, -30px -30px;
+    }
+  }
+
   @keyframes rainbow {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
-  }
-
-  .cube-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Arial', sans-serif;
-    font-weight: bold;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-    white-space: nowrap;
-    pointer-events: none;
-    mix-blend-mode: overlay;
-    letter-spacing: 1px;
-    z-index: 1;
   }
 `;
 
