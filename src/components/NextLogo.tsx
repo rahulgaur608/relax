@@ -1,11 +1,7 @@
 "use client"
 
-import { Canvas, useThree } from "@react-three/fiber"
-import { OrbitControls, Environment } from "@react-three/drei"
-import { useRef, useState, useEffect } from "react"
-import * as THREE from "three"
-
-// ... existing Next logo code ...
+import { Canvas } from "@react-three/fiber"
+import Scene from "@/components/Scene/Scene"
 
 export default function NextLogo() {
   return (
