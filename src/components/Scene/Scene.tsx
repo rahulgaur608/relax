@@ -36,17 +36,24 @@ const SCENE_CONFIG = {
     }
   },
   CAMERA: {
-    initialPosition: new Vector3(0, 5, 15),
-    orbitRadius: 15,
-    orbitSpeed: 0.05,
-    heightOffset: 5,
-    lookAtOffset: new Vector3(0, 2, 0)
+    initialPosition: new Vector3(0, 8, 20),
+    orbitRadius: 20,
+    orbitSpeed: 0.03,
+    heightOffset: 8,
+    verticalAmplitude: 1.5,
+    verticalSpeed: 0.5,
+    smoothFactor: 0.015,
+    lookAtOffset: new Vector3(0, 3, 0),
+    tiltAngle: Math.PI * 0.05
   }
 } as const
 
 export default function Scene() {
   const { scene, camera } = useThree()
-  const cameraRef = useRef({ time: 0 })
+  const cameraRef = useRef({ 
+    time: 0,
+    verticalTime: 0 
+  })
   
   useEffect(() => {
     scene.fog = new FogExp2(SCENE_CONFIG.FOG_COLOR, SCENE_CONFIG.FOG_DENSITY)
@@ -57,17 +64,26 @@ export default function Scene() {
   }, [scene, camera])
 
   useFrame((state, delta) => {
-    // Update camera position for orbital movement
+    // Update time for both orbital and vertical movement
     cameraRef.current.time += delta * SCENE_CONFIG.CAMERA.orbitSpeed
-    const angle = cameraRef.current.time
+    cameraRef.current.verticalTime += delta * SCENE_CONFIG.CAMERA.verticalSpeed
     
+    const angle = cameraRef.current.time
+    const verticalOffset = Math.sin(cameraRef.current.verticalTime) * SCENE_CONFIG.CAMERA.verticalAmplitude
+    
+    // Calculate target position with orbital and vertical movement
     const targetX = Math.sin(angle) * SCENE_CONFIG.CAMERA.orbitRadius
     const targetZ = Math.cos(angle) * SCENE_CONFIG.CAMERA.orbitRadius
+    const targetY = SCENE_CONFIG.CAMERA.heightOffset + verticalOffset
     
     // Smoothly interpolate camera position
-    camera.position.x += (targetX - camera.position.x) * 0.02
-    camera.position.z += (targetZ - camera.position.z) * 0.02
-    camera.position.y = SCENE_CONFIG.CAMERA.heightOffset
+    camera.position.x += (targetX - camera.position.x) * SCENE_CONFIG.CAMERA.smoothFactor
+    camera.position.z += (targetZ - camera.position.z) * SCENE_CONFIG.CAMERA.smoothFactor
+    camera.position.y += (targetY - camera.position.y) * SCENE_CONFIG.CAMERA.smoothFactor
+    
+    // Add slight tilt based on position
+    const tiltAngle = Math.sin(angle) * SCENE_CONFIG.CAMERA.tiltAngle
+    camera.rotation.z = tiltAngle
     
     // Smoothly look at center point with offset
     camera.lookAt(SCENE_CONFIG.CAMERA.lookAtOffset)
