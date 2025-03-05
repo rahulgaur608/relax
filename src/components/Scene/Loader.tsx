@@ -167,33 +167,43 @@ const StyledWrapper = styled.div`
     height: 100%;
     transform: rotateY(calc(90deg * var(--i))) translateZ(37.5px);
     background: linear-gradient(
-      to bottom,
-      hsl(330, 3.13%, 25.1%) 0%,
-      hsl(177.27, 21.71%, 32.06%) 5.5%,
-      hsl(176.67, 34.1%, 36.88%) 12.1%,
-      hsl(176.61, 42.28%, 40.7%) 19.6%,
-      hsl(176.63, 48.32%, 43.88%) 27.9%,
-      hsl(176.66, 53.07%, 46.58%) 36.6%,
-      hsl(176.7, 56.94%, 48.91%) 45.6%,
-      hsl(176.74, 62.39%, 50.91%) 54.6%,
-      hsl(176.77, 69.86%, 52.62%) 63.4%,
-      hsl(176.8, 76.78%, 54.08%) 71.7%,
-      hsl(176.83, 83.02%, 55.29%) 79.4%,
-      hsl(176.85, 88.44%, 56.28%) 86.2%,
-      hsl(176.86, 92.9%, 57.04%) 91.9%,
-      hsl(176.88, 96.24%, 57.59%) 96.3%,
-      hsl(176.88, 98.34%, 57.93%) 99%,
-      hsl(176.89, 99.07%, 58.04%) 100%
+      45deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000
     );
+    background-size: 400%;
+    animation: rainbow 12s linear infinite;
+    opacity: 0.8;
   }
 
   .cube-top {
     position: absolute;
     width: 75px;
     height: 75px;
-    background: hsl(330, 3.13%, 25.1%) 0%;
+    background: linear-gradient(
+      45deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000
+    );
+    background-size: 400%;
+    animation: rainbow 12s linear infinite;
     transform: rotateX(90deg) translateZ(37.5px);
     transform-style: preserve-3d;
+    opacity: 0.8;
   }
 
   .cube-top::before {
@@ -201,13 +211,20 @@ const StyledWrapper = styled.div`
     position: absolute;
     width: 75px;
     height: 75px;
-    background: hsl(176.61, 42.28%, 40.7%) 19.6%;
+    background: rgba(255, 255, 255, 0.1);
     transform: translateZ(-90px);
-    filter: blur(10px);
-    box-shadow: 0 0 10px #323232,
-                0 0 20px hsl(176.61, 42.28%, 40.7%) 19.6%,
-                0 0 30px #323232,
-                0 0 40px hsl(176.61, 42.28%, 40.7%) 19.6%;
+    filter: blur(20px);
+    box-shadow: 
+      0 0 20px rgba(255, 255, 255, 0.2),
+      0 0 40px rgba(255, 255, 255, 0.2),
+      0 0 60px rgba(255, 255, 255, 0.2),
+      0 0 80px rgba(255, 255, 255, 0.2);
+  }
+
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 `;
 
