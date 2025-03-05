@@ -19,6 +19,11 @@ const Loader = () => {
       {showInfo && (
         <div className="info-tooltip">
           <div className="info-content">
+            <div className="creator">
+              <span className="creator-label">Created by</span>
+              <span className="creator-name">Rahul.G</span>
+            </div>
+            
             <h3 className="info-title">Controls</h3>
             <ul className="info-list">
               <li>WASD - Move</li>
@@ -59,6 +64,40 @@ const StyledWrapper = styled.div`
     font-size: 0.875rem;
     transform-origin: bottom right;
     animation: tooltipFadeIn 0.2s ease-out;
+  }
+
+  .creator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .creator-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.875rem;
+    font-weight: 300;
+  }
+
+  .creator-name {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-weight: 500;
+    background: linear-gradient(to right, #64b5f6, #2196f3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: nameGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes nameGlow {
+    0%, 100% {
+      filter: drop-shadow(0 0 2px rgba(33, 150, 243, 0.3));
+    }
+    50% {
+      filter: drop-shadow(0 0 6px rgba(33, 150, 243, 0.6));
+    }
   }
 
   .info-content {
