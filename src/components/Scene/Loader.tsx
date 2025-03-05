@@ -7,12 +7,22 @@ const Loader = () => {
   return (
     <StyledWrapper onMouseEnter={() => setShowInfo(true)} onMouseLeave={() => setShowInfo(false)}>
       <div className="cube-loader">
-        <div className="cube-top" />
+        <div className="cube-top">
+          <span className="cube-text">RAHUL.G</span>
+        </div>
         <div className="cube-wrapper">
-          <span style={{'--i': 0} as React.CSSProperties} className="cube-span" />
-          <span style={{'--i': 1} as React.CSSProperties} className="cube-span" />
-          <span style={{'--i': 2} as React.CSSProperties} className="cube-span" />
-          <span style={{'--i': 3} as React.CSSProperties} className="cube-span" />
+          <span style={{'--i': 0} as React.CSSProperties} className="cube-span">
+            <span className="cube-text">RAHUL.G</span>
+          </span>
+          <span style={{'--i': 1} as React.CSSProperties} className="cube-span">
+            <span className="cube-text">RAHUL.G</span>
+          </span>
+          <span style={{'--i': 2} as React.CSSProperties} className="cube-span">
+            <span className="cube-text">RAHUL.G</span>
+          </span>
+          <span style={{'--i': 3} as React.CSSProperties} className="cube-span">
+            <span className="cube-text">RAHUL.G</span>
+          </span>
         </div>
       </div>
       
@@ -225,6 +235,23 @@ const StyledWrapper = styled.div`
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  .cube-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    letter-spacing: 1px;
+    z-index: 1;
   }
 `;
 
