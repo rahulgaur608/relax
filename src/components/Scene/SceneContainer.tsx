@@ -243,9 +243,6 @@ export default function SceneContainer() {
 
   return (
     <div className="w-full h-screen">
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
-        <Loader />
-      </div>
       <Canvas 
         id="canvas"
         shadows 
@@ -258,7 +255,10 @@ export default function SceneContainer() {
       <AudioPlayer />
       <MenuOverlay isVisible={showMenu} onClose={() => setShowMenu(false)} />
       
-      <div className="fixed bottom-6 right-6 z-10 flex gap-4">
+      <div className="fixed bottom-6 right-6 z-10 flex items-center gap-4">
+        <div className="scale-75">
+          <Loader />
+        </div>
         <SceneButton onClick={() => setShowMenu(true)}>About</SceneButton>
       </div>
     </div>
