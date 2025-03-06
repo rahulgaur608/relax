@@ -6,12 +6,74 @@ const Loader = () => {
   const [isActive, setIsActive] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
   const [ripples, setRipples] = useState<{ x: number; y: number; id: number }[]>([]);
+  // Define boundary limits for the invisible barrier
+  const boundaryLimits = {
+    xMin: -10,
+    xMax: 10,
+    yMin: -10,
+    yMax: 10
+  };
+  
+  // Add state to track if user is hitting the barrier
+  const [hittingBarrier, setHittingBarrier] = useState(false);
+  // Add state to track resistance level (0-1)
+  const [resistance, setResistance] = useState(0);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    
+    // Calculate raw coordinates
+    let rawX = ((e.clientX - rect.left) / rect.width - 0.5) * 20;
+    let rawY = ((e.clientY - rect.top) / rect.height - 0.5) * 20;
+    
+    // Calculate distance from boundaries
+    const distanceFromXMin = Math.abs(rawX - boundaryLimits.xMin);
+    const distanceFromXMax = Math.abs(rawX - boundaryLimits.xMax);
+    const distanceFromYMin = Math.abs(rawY - boundaryLimits.yMin);
+    const distanceFromYMax = Math.abs(rawY - boundaryLimits.yMax);
+    
+    // Find the minimum distance to any boundary
+    const minDistance = Math.min(distanceFromXMin, distanceFromXMax, distanceFromYMin, distanceFromYMax);
+    
+    // Calculate resistance (increases as we get closer to boundary)
+    // Resistance zone is 3 units from the boundary
+    const resistanceZone = 3;
+    const newResistance = minDistance < resistanceZone ? 1 - (minDistance / resistanceZone) : 0;
+    setResistance(newResistance);
+    
+    // Check if we're hitting the barrier before clamping
+    const wouldHitBarrier = isAtBoundary(rawX, rawY);
+    setHittingBarrier(wouldHitBarrier);
+    
+    // Apply boundary limits with resistance effect
+    // As resistance increases, movement slows down
+    const resistanceFactor = 1 - (newResistance * 0.8); // 0.8 is max slowdown factor
+    
+    // Apply resistance to raw coordinates before clamping
+    const resistedX = wouldHitBarrier ? coords.x + ((rawX - coords.x) * resistanceFactor) : rawX;
+    const resistedY = wouldHitBarrier ? coords.y + ((rawY - coords.y) * resistanceFactor) : rawY;
+    
+    // Then apply hard limits
+    const x = Math.max(boundaryLimits.xMin, Math.min(boundaryLimits.xMax, resistedX));
+    const y = Math.max(boundaryLimits.yMin, Math.min(boundaryLimits.yMax, resistedY));
+    
     setCoords({ x, y });
+    
+    // Add a subtle bounce effect when hitting the barrier
+    if (wouldHitBarrier && !hittingBarrier) {
+      // Create a bounce effect by adding a ripple at the barrier point
+      addRipple(e);
+    }
+  };
+  
+  // Add a function to check if we're at the boundary
+  const isAtBoundary = (x: number, y: number): boolean => {
+    return (
+      x <= boundaryLimits.xMin || 
+      x >= boundaryLimits.xMax || 
+      y <= boundaryLimits.yMin || 
+      y >= boundaryLimits.yMax
+    );
   };
 
   const addRipple = (e: React.MouseEvent) => {
@@ -41,6 +103,8 @@ const Loader = () => {
         setShowInfo(false);
         setIsActive(false);
         setCoords({ x: 0, y: 0 });
+        setHittingBarrier(false);
+        setResistance(0);
       }}
       onMouseMove={handleMouseMove}
       onMouseDown={(e) => {
@@ -48,9 +112,11 @@ const Loader = () => {
         addRipple(e);
       }}
       onMouseUp={() => setIsActive(false)}
-      className={isActive ? 'active' : ''}
+      className={`${isActive ? 'active' : ''} ${hittingBarrier ? 'hitting-barrier' : ''} ${resistance > 0 ? 'resistance' : ''}`}
       style={{
-        transform: `perspective(1000px) rotateX(${-coords.y}deg) rotateY(${coords.x}deg) scale(${isActive ? '0.95' : '1'})`
+        transform: `perspective(1000px) rotateX(${-coords.y}deg) rotateY(${coords.x}deg) scale(${isActive ? '0.95' : '1'})`,
+        // Add a subtle glow effect based on resistance level
+        boxShadow: resistance > 0 ? `0 0 ${resistance * 10}px rgba(255, 165, 0, ${resistance * 0.5})` : 'none'
       }}
     >
       <div className="cube-loader">
@@ -124,6 +190,29 @@ const StyledWrapper = styled.div`
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
+
+  /* Add styles for barrier effect */
+  &.hitting-barrier {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    animation: barrierPulse 0.3s ease-in-out;
+  }
+  
+  /* Add styles for resistance effect */
+  &.resistance {
+    transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes barrierPulse {
+    0% {
+      box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+    }
+  }
 
   .ripple {
     position: absolute;
